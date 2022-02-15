@@ -65,7 +65,7 @@ const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
 const logger = pino({
   name: 'filterservice-server',
   messageKey: 'message',
-  changeLevelName: 'severity',
+  levelKey: 'severity',
   useLevelLabels: true
 });
 
@@ -92,16 +92,24 @@ function _loadProto (path) {
  */
 function _getProducts (callback) {
   const data = require('./data/product_catalog.json');
-  callback(data);
+  // console.log(data.products);
+  if (callback) {
+  callback(data.products);
+  }
 }
 
 /**
  * Lists the supported currencies
  */
-function getSupportedCategories (call, callback) {
-  logger.info('Getting supported currencies...');
+function getSupportedCategories (callback) {
+  logger.info('Getting supported categories...');
   _getProducts((data) => {
-    callback(null, {categories: Object.keys(data.categories)});
+    // callback(null, {categories: Object.keys(data.categories)});
+    cat = []
+    data.forEach(ele => ele.categories.forEach(item => cat.push(item)))
+    if (callback) {
+    callback(cat);
+    }
   });
 }
 
@@ -113,14 +121,16 @@ function filter (call, callback) {
     _getProducts((data) => {
       const request = call.request;
       // Convert: from_currency --> EUR
-      const from = request.from;
-      from.filter_code
-      results = data
-      results.filter(ele => {
-        ele.categories.includes(from.filter_code) ? true : false
+      // const from = request.from;
+      results = []
+      data.map(ele => {
+        ele.categories.includes(request.filter_code) ? results.push(ele) : null
       })
       logger.info(`filter request successful`);
-      callback(null, result);
+      console.log(results)
+      if (callback) {
+      callback(null, results);
+      }
     });
   } catch (err) {
     logger.error(`filter request failed: ${err}`);
@@ -139,20 +149,25 @@ function check (call, callback) {
  * CurrencyConverter service at the sample server port
  */
 function main () {
-  logger.info(`Starting gRPC server on port ${PORT}...`);
-  const server = new grpc.Server();
-  server.addService(shopProto.FilterService.service, {getSupportedCategories, filter});
-    // , convert});
-  server.addService(healthProto.Health.service, {check});
+  // logger.info(`Starting gRPC server on port ${PORT}...`);
+  // const server = new grpc.Server();
+  // server.addService(shopProto.FilterService.service, {getSupportedCategories, filter});
+  //   // , convert});
+  // server.addService(healthProto.Health.service, {check});
 
-  server.bindAsync(
-    `0.0.0.0:${PORT}`,
-    grpc.ServerCredentials.createInsecure(),
-    function() {
-      logger.info(`FilterService gRPC server started on port ${PORT}`);
-      server.start();
-    },
-   );
+  // server.bindAsync(
+  //   `0.0.0.0:${PORT}`,
+  //   grpc.ServerCredentials.createInsecure(),
+  //   function() {
+  //     logger.info(`FilterService gRPC server started on port ${PORT}`);
+  //     server.start();
+  //   },
+  //  );
+  console.log('\n')
+  //  _getProducts(data => console.log(data))
+  //  getSupportedCategories(data => console.log(data))
+  //  filter({request : {filter_code: 'kitchen'}}, data => console.log(data))
 }
 
 main();
+
