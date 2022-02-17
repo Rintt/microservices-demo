@@ -42,10 +42,16 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 	return out, nil
 }
 
+func (fe *frontendServer) getCategories(ctx context.Context) ([]*pb.Product, error) {
+	resp, err := pb.NewCategoriesFilterServiceClient(fe.categoriesFilterSvcConn).
+		GetSupportedCategories(ctx, &pb.Empty{})
+	return resp.GetProducts(), err
+}
+
 func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error) {
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
-		ListProducts(ctx, &pb.Empty{})
-	return resp.GetProducts(), err
+		GetCategories(ctx, &pb.Empty{})
+	return resp, err
 }
 
 func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Product, error) {
