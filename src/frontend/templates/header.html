@@ -62,7 +62,7 @@
                 </a>
                 <div class="controls">
 
-                    {{ if $.show_categories }}
+                   
                     <div class="h-controls">
                         <div class="h-control">
                             <span class="dropdown-menu"> Category</span>
@@ -70,7 +70,7 @@
                                 <select name="categories_code" onchange="document.getElementById('categories_form').submit();">
                                         {{range $.categories}}
                                     <option value="{{.}}" {{if eq . $.user_categories}}selected="selected"{{end}}>{{.}}</option>
-                                    {{end}}
+                                 
                                 </select>
                             </form>
                     {{ if $.show_currency }}
