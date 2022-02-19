@@ -60,6 +60,16 @@
                     <img src="/static/icons/Hipster_NavLogo.svg" alt="" class="top-left-logo" />
                     {{ end }}
                 </a>
+                <div class="navbar sub-navbar">
+                    <div class="container d-flex justify-content-between">
+                        <a href="/" class="navbar-brand d-flex align-items-center">
+                            {{ if $.is_cymbal_brand }}
+                            <img src="/static/icons/Cymbal_NavLogo.svg" alt="" class="top-left-logo-cymbal" />
+                            {{ else }}
+                            <img src="/static/icons/Hipster_NavLogo.svg" alt="" class="top-left-logo" />
+                            {{ end }}
+                        </a>
+                      
                 <div class="controls">
 
                    
