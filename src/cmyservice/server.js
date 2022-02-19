@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// if(process.env.DISABLE_PROFILER) {
+// if (process.env.DISABLE_PROFILER) {
 //   console.log("Profiler disabled.")
 // }
 // else {
@@ -28,7 +28,7 @@
 // }
 
 
-// if(process.env.DISABLE_TRACING) {
+// if (process.env.DISABLE_TRACING) {
 //   console.log("Tracing disabled.")
 // }
 // else {
@@ -36,7 +36,7 @@
 //   require('@google-cloud/trace-agent').start();
 // }
 
-// if(process.env.DISABLE_DEBUGGER) {
+// if (process.env.DISABLE_DEBUGGER) {
 //   console.log("Debugger disabled.")
 // }
 // else {
@@ -57,7 +57,7 @@ const protoLoader = require('@grpc/proto-loader');
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
 
-const PORT = 5000;
+const PORT = 5001;
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
@@ -72,7 +72,7 @@ const logger = pino({
 /**
  * Helper function that loads a protobuf file.
  */
-function _loadProto (path) {
+function _loadProto(path) {
   const packageDefinition = protoLoader.loadSync(
     path,
     {
@@ -90,33 +90,39 @@ function _loadProto (path) {
  * Helper function that gets currency data from a stored JSON file
  * Uses public data from European Central Bank
  */
-function _getProducts (callback) {
+function _getProducts(callback) {
   const data = require('./data/product_catalog.json');
-  // console.log(data.products);
+  console.log(data.products);
   if (callback) {
-  callback(data.products);
+    callback(data.products);
   }
 }
 
 /**
  * Lists the supported currencies
  */
-function getSupportedCategories (callback) {
+function getSupportedCategories(products, callback) {
   logger.info('Getting supported categories...');
-  _getProducts((data) => {
-    // callback(null, {categories: Object.keys(data.categories)});
-    cat = []
-    data.forEach(ele => ele.categories.forEach(item => cat.push(item)))
-    if (callback) {
-    callback(cat);
-    }
-  });
+  cat = []
+  if (products) {
+      products.forEach(ele => ele.categories.forEach(item => cat.push(item)))
+  }
+  else {
+    _getProducts((data) => {
+      // callback(null, {categories: Object.keys(data.categories)});
+      data.forEach(ele => ele.categories.forEach(item => cat.push(item)))
+      
+    });
+  }
+  if (callback) {
+  callback(cat);
+  }
 }
 
 /**
  * Filters the products according to the 'from' in request
  */
-function filter (call, callback) {
+function filter(call, callback) {
   try {
     _getProducts((data) => {
       const request = call.request;
@@ -129,7 +135,7 @@ function filter (call, callback) {
       logger.info(`filter request successful`);
       console.log(results)
       if (callback) {
-      callback(null, results);
+        callback(null, results);
       }
     });
   } catch (err) {
@@ -141,7 +147,7 @@ function filter (call, callback) {
 /**
  * Endpoint for health checks
  */
-function check (call, callback) {
+function check(call, callback) {
   callback(null, { status: 'SERVING' });
 }
 /**
@@ -149,21 +155,21 @@ function check (call, callback) {
  * CurrencyConverter service at the sample server port
  */
 function main () {
-  // logger.info(`Starting gRPC server on port ${PORT}...`);
-  // const server = new grpc.Server();
-  // server.addService(shopProto.FilterService.service, {getSupportedCategories, filter});
-  //   // , convert});
-  // server.addService(healthProto.Health.service, {check});
+  logger.info(`Starting gRPC server on port ${PORT}...`);
+  const server = new grpc.Server();
+  server.addService(shopProto.FilterService.service, {getSupportedCategories, filter});
+    // , convert});
+  server.addService(healthProto.Health.service, {check});
 
-  // server.bindAsync(
-  //   `0.0.0.0:${PORT}`,
-  //   grpc.ServerCredentials.createInsecure(),
-  //   function() {
-  //     logger.info(`FilterService gRPC server started on port ${PORT}`);
-  //     server.start();
-  //   },
-  //  );
-  console.log('\n')
+  server.bindAsync(
+    `0.0.0.0:${PORT}`,
+    grpc.ServerCredentials.createInsecure(),
+    function() {
+      logger.info(`FilterService gRPC server started on port ${PORT}`);
+      server.start();
+    },
+   );
+  // console.log('\n')
   //  _getProducts(data => console.log(data))
   //  getSupportedCategories(data => console.log(data))
   //  filter({request : {filter_code: 'kitchen'}}, data => console.log(data))

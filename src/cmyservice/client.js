@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  */
-require('@google-cloud/trace-agent').start();
+// require('@google-cloud/trace-agent').start();
 
 const path = require('path');
 const grpc = require('grpc');
@@ -23,7 +23,7 @@ const leftPad = require('left-pad');
 const pino = require('pino');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
-const PORT = 5000;
+const PORT = 5001;
 
 const shopProto = grpc.load(PROTO_PATH).hipstershop;
 const client = new shopProto.FilterService(`localhost:${PORT}`,
@@ -39,10 +39,6 @@ const logger = pino({
 const request = {
     filter_code: 'kitchen',
 };
-
-function _filterCatalog (m) {
-  return `${m.units}.${m.nanos.toString().padStart(9,'0')} ${m.filter_code}`;
-}
 
 client.getSupportedCategories({}, (err, response) => {
   if (err) {

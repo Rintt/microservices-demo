@@ -108,6 +108,8 @@ spec:
             value: "paymentservice:50051"
           - name: EMAIL_SERVICE_ADDR
             value: "emailservice:5000"
+          - name: FILTER_SERVICE_ADDR
+            value: "filterservice:5001"
           - name: CURRENCY_SERVICE_ADDR
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
@@ -746,4 +748,64 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filterservice
+spec:
+  selector:
+    matchLabels:
+      app: filterservice
+  template:
+    metadata:
+      labels:
+        app: filterservice
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: server
+        image: yufax/filterservice
+        ports:
+        - containerPort: 5001
+        env:
+        - name: PORT
+          value: "5001"
+        - name: DISABLE_STATS
+          value: "1"
+        - name: DISABLE_TRACING
+          value: "1"
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:5001"]
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:5001"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: filterservice
+spec:
+  type: ClusterIP
+  selector:
+    app: filterservice
+  ports:
+  - name: grpc
+    port: 5001
+    targetPort: 5001
 ---
