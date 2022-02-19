@@ -36,6 +36,8 @@ build:
     context: src/paymentservice
   - image: currencyservice
     context: src/currencyservice
+  - image: filterservice
+    context: src/filterservice
   - image: cartservice
     context: src/cartservice/src
     docker:
@@ -55,6 +57,7 @@ deploy:
     - ./kubernetes-manifests/cartservice.yaml
     - ./kubernetes-manifests/checkoutservice.yaml
     - ./kubernetes-manifests/currencyservice.yaml
+    - ./kubernetes-manifests/filterservice.yaml
     - ./kubernetes-manifests/emailservice.yaml
     - ./kubernetes-manifests/frontend.yaml
     - ./kubernetes-manifests/paymentservice.yaml
