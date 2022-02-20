@@ -48,7 +48,7 @@
     <header>
         <div class="navbar">
             <div class="container d-flex justify-content-center">
-                <div class="h-free-shipping">Free shipping with $75 purchase!</div>
+                <div class="h-free-shipping">Free shipping with $75 bla bla bla purchase!</div>
             </div>
         </div>
         <div class="navbar sub-navbar">
@@ -59,9 +59,19 @@
                     {{ else }}
                     <img src="/static/icons/Hipster_NavLogo.svg" alt="" class="top-left-logo" />
                     {{ end }}
-                </a>
                 <div class="controls">
 
+                   
+                    <div class="h-controls">
+                        <div class="h-control">
+                            <span class="dropdown-menu"> Category</span>
+                            <form method="POST" class="controls-form" action="/setCategories" id="categories_form" >
+                                <select name="categories_code" onchange="document.getElementById('categories_form').submit();">
+                                        {{range $.categories}}
+                                    <option value="{{.}}" {{if eq . $.user_categories}}selected="selected"{{end}}>{{.}}</option>
+                                 
+                                </select>
+                            </form>
                     {{ if $.show_currency }}
                     <div class="h-controls">
                         <div class="h-control">
